@@ -1,46 +1,136 @@
-import pygame as pg
-from pygame.locals import *
+import pygame
+from pygame import mixer
+import random
+import math
 
-import time
+#プログラムの初めに必ず初期化
+pygame.init()
+#ウィンドウの大きさ，名前設定
+screen = pygame.display.set_mode((600, 450))
+#背景色の設定
+screen.fill((0, 0, 0))
+pygame.display.set_caption('action2d')
 
-pg.init()
-screen = pg.display.set_mode((800, 600))
-pg.display.set_caption('action2d')
-clock = pg.time.Clock()
+#画像読み込み
+playerImg = pygame.image.load('rocket.png')
+playerX = 284
+playerY = 400
+#移動度合い
+playerX_Change = 0
+playerY_Change = 0
 
-class Player(pg.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pg.Surface((50, 50))
-        self.image.fill((255, 0, 0))
-        self.rect = self.image.get_rect()
-        self.rect.x = 100
-        self.rect.y = 500
-        self.velocity = 5
+enemyImg = pygame.image.load('rocket.png')
+enemyX = random.randint(0, 568)
+enemyY = random.randint(50, 100)
+enemyX_Change = 3
+enemyY_Change = 30
 
-    def update(self):
-        keys = pg.key.get_pressed()
-        if keys[K_LEFT]:
-            self.rect.x -= self.velocity
-        if keys[K_RIGHT]:
-            self.rect.x += self.velocity
-        if keys[K_SPACE]:
-            self.rect.y -= self.velocity
+bulletImg = pygame.image.load('rocket.png')
+bulletX = 0
+bulletY = 400
+bulletX_Change = 0
+bulletY_Change = 3
+bulletState = 'ready'
 
-player = Player()
-all_sprites = pg.sprite.Group()
-all_sprites.add(player)
+scoreValue = 0
 
+#音声出力
+#mixer.sound('').play()
+
+#プレイヤーを表示する関数
+def displayPlayer(x, y):
+    screen.blit(playerImg, (x, y))
+
+def displayEnemy(x, y):
+    screen.blit(enemyImg, (x, y))
+
+def fire_bullet(x, y):
+    global bulletState
+    bulletState = 'fire'
+    screen.blit(bulletImg, (x + 16, y + 10))
+
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt(math.pow(enemyX - bulletX, 2) + math.pow(enemyY - bulletY, 2))
+    if distance < 27:
+        return True
+    else:
+        return False
+
+#ゲーム本体
 running = True
 while running:
-    for event in pg.event.get():
-        if event.type == QUIT:
+    screen.fill((0, 0, 0))
+
+    for event in pygame.event.get():
+        #QUIT = ウィンドウの×ボタンが押された時
+        if event.type == pygame.QUIT:
             running = False
 
-    all_sprites.update()
-    screen.fill((0, 0, 0))
-    all_sprites.draw(screen)
-    pg.display.flip()
-    clock.tick(60)
+        #キーが押された時
+        if event.type == pygame.KEYDOWN:
+            #左キーが押された時
+            if event.key == pygame.K_LEFT:
+                playerX_Change = -1.5
+            #右キーが押された時
+            elif event.key == pygame.K_RIGHT:
+                playerX_Change = 1.5
+            #スペースキーが押された時
+            elif event.key == pygame.K_SPACE:
+                if bulletState == 'ready':
+                    bulletX = playerX
+                    fire_bullet(bulletX, bulletY)
 
-pg.quit()
+        #キーが離された時
+        if event.type == pygame.KEYUP:
+            #左キーか右キーが押された時
+            if event.key == pygame.K_LEFT or pygame.K_RIGHT:
+                playerX_Change = 0
+
+    playerX += playerX_Change
+
+    #画面外にはみ出すのを防止
+    if playerX <= 0:
+        playerX = 0
+    elif playerX > 568:
+        playerX = 568
+
+    #敵が一定ラインを越えたらゲームオーバー
+    if enemyY > 380:
+        break
+
+    enemyX += enemyX_Change
+    if enemyX <= 0:
+        enemyX_Change = 3
+        enemyY += enemyY_Change
+    elif enemyX >= 568:
+        enemyX_Change = -3
+        enemyY += enemyY_Change
+
+    collision = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision:
+        bulletY = 400
+        bulletState = 'ready'
+        scoreValue += 1
+        enemyX = random.randint(0, 568)
+        enemyY = random.randint(50, 100)
+
+    if bulletY <= 0:
+        bulletY = 400
+        bulletState = 'ready'
+
+    if bulletState == 'fire':
+        fire_bullet(bulletX, bulletY)
+        bulletY -= bulletY_Change
+
+
+    font = pygame.font.SysFont(None, 32)
+    score = font.render("Score :" + str(scoreValue), True, (255, 255, 255))
+    screen.blit(score, (20,30))
+
+    displayPlayer(playerX, playerY)
+    displayEnemy(enemyX, enemyY)
+
+    #スクリーン上のものを更新したときは必ず更新
+    pygame.display.update()
+
+pygame.quit()
