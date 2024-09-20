@@ -1,6 +1,13 @@
-"#action2d" 
+<h2>参考</h2>
+https://www.youtube.com/watch?v=fAJ_BjLd3Ro&t=189s
+
 <h4>シューティングゲームを作る気らしい・・？</h4>
 左右キーで移動<br>
 スペースキーで射撃<br>
-
-https://tdtiger.github.io/action2d/
+弾は画面内に一発までしか存在できない<br>
+敵が防衛ラインまで到達したらゲームオーバー<br>
+<br>
+<br>
+「クリア条件はありません」
+<br>
+<br>
