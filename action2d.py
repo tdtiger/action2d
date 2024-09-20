@@ -11,24 +11,26 @@ screen = pygame.display.set_mode((600, 450))
 #画面の左端，右端(画像が32×32なことを考慮)
 leftEdge = 0
 rightEdge = 568
+
 #背景色の設定
 screen.fill((0, 0, 0))
 pygame.display.set_caption('action2d')
 
-#画像読み込み
+#プレイヤー
 playerImg = pygame.image.load('rocket.png')
 playerX = 284
 playerY = 400
-#移動度合い
 playerX_Change = 0
 playerY_Change = 0
 
+#敵
 enemyImg = pygame.image.load('rocket.png')
 enemyX = random.randint(leftEdge, rightEdge)
 enemyY = random.randint(50, 100)
 enemyX_Change = 3
 enemyY_Change = 30
 
+#弾
 bulletImg = pygame.image.load('rocket.png')
 bulletX = 0
 bulletY = 400
@@ -41,7 +43,6 @@ scoreValue = 0
 #音声出力
 #mixer.sound('').play()
 
-#プレイヤーを表示する関数
 def displayPlayer(x, y):
     screen.blit(playerImg, (x, y))
 
@@ -105,6 +106,8 @@ while running:
 
     #敵が一定ラインを越えたらゲームオーバー
     if enemyY > 380:
+        #このままだとぶちっと切れるのでそういう演出のための関数でなんかしたい．
+        #gameover()
         break
 
     enemyX += enemyX_Change
