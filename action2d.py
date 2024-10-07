@@ -41,6 +41,12 @@ bulletState = 'ready'
 
 scoreValue = 0
 
+#更新範囲管理用
+rect_p = pygame.Rect(0, 0, 0, 0)
+rect_e = pygame.Rect(0, 0, 0, 0)
+rect_b = pygame.Rect(0, 0, 0, 0)
+rect_s = pygame.Rect(20, 30, 90, 30)
+
 #音声出力
 #mixer.sound('').play()
 
@@ -77,12 +83,20 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 def gameover():
     font = pygame.font.SysFont(None, 84)
     message = font.render("GAME OVER", True, (255, 255, 255))
-    screen.blit(message, (105, 190))
+    screen.blit(message, (130, 190))
     pygame.display.update()
-    time.sleep(5)
+    time.sleep(3)
 
 #ゲーム本体
 running = True
+
+screen.fill((0, 0, 0))
+pygame.draw.line(screen, (40, 40, 40), (0, 390), (600, 390), 3)
+font = pygame.font.SysFont(None, 24)
+line = font.render("defence line", True, (70, 70, 70))
+screen.blit(line, (10,365))
+pygame.display.update()
+
 while running:
     screen.fill((0, 0, 0))
     pygame.draw.line(screen, (40, 40, 40), (0, 390), (600, 390), 3)
@@ -124,6 +138,8 @@ while running:
     elif playerX > rightEdge:
         playerX = rightEdge
 
+    rect_p = (playerX - 32, playerY, 96, 32)
+
     #敵が一定ラインを越えたらゲームオーバー
     if enemyY > 380:
         gameover()
@@ -147,6 +163,12 @@ while running:
         enemyX = random.randint(leftEdge, rightEdge)
         enemyY = random.randint(50, 100)
 
+    #敵周辺の再描画位置の設定
+    if enemyX_Change == 3:
+        rect_e = (enemyX - 32, enemyY - 32, 64, 64)
+    elif enemyX_Change == -3:
+        rect_e = (enemyX, enemyY -32, 64, 64)
+
     #弾がウィンドウ外に行ったら消す
     if bulletY <= 0:
         bulletY = 400
@@ -156,6 +178,7 @@ while running:
     if bulletState == 'fire':
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_Change
+        rect_b = (bulletX - 32, bulletY - 32, 64, 64)
 
     #スコア表示
     font = pygame.font.SysFont(None, 32)
@@ -167,6 +190,12 @@ while running:
     displayEnemy(enemyX, enemyY)
 
     #スクリーン上のものを更新したときは必ず更新
-    pygame.display.update()
+    if collision:
+        pygame.display.update()
+    else:
+        pygame.display.update(rect_p)
+        pygame.display.update(rect_e)
+        pygame.display.update(rect_s)
+        pygame.display.update(rect_b)
 
 pygame.quit()
