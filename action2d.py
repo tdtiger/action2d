@@ -34,7 +34,7 @@ enemyY_Change = 30
 #弾
 bulletImg = pygame.image.load('bullet.png')
 bulletX = 0
-bulletY = 400
+bulletY = 500
 bulletX_Change = 0
 bulletY_Change = 3
 bulletState = 'ready'
